@@ -1,0 +1,3 @@
+[submodule "chibios"]
+	path = ChibiOS
+	url = https://github.com/cvra/chibios
