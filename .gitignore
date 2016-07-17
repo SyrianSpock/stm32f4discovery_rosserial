@@ -40,6 +40,5 @@ app_src.mk
 
 CMakeLists.txt
 
-# uavcan dsdl compiler output
-dsdlc_generated/
-tags
+# Ctags
+.tags*
