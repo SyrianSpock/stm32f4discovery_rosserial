@@ -2,9 +2,16 @@
 #include "hal.h"
 #include "usbcfg.h"
 
+#include "discovery_demo/button.h"
+
 #include "ros.h"
 #include "std_msgs/String.h"
 
+
+ros::NodeHandle ros_node;
+
+std_msgs::String str_msg;
+ros::Publisher chatter("chatter", &str_msg);
 
 /*
  * This is a periodic thread that does absolutely nothing except flashing
@@ -21,6 +28,13 @@ static THD_FUNCTION(Thread1, arg) {
         palClearPad(GPIOD, GPIOD_LED3); /* Orange.  */
         chThdSleepMilliseconds(500);
     }
+}
+
+void button_cb(void)
+{
+    char hello[16] = "Button pressed!";
+    str_msg.data = hello;
+    chatter.publish(&str_msg);
 }
 
 /*
@@ -47,28 +61,22 @@ int main(void)
     usbStart(serusbcfg.usbp, &usbcfg);
     usbConnectBus(serusbcfg.usbp);
 
-    /*
-     * Creates the example thread.
-     */
+    /* Create blinker thread */
     chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
 
+
     /* ROS setup */
-    ros::NodeHandle ros_node;
     ros_node.initNode();
 
     /* ROS publisher */
-    std_msgs::String str_msg;
-    ros::Publisher chatter("chatter", &str_msg);
     ros_node.advertise(chatter);
 
-    char hello[13] = "hello world!";
+    /* Setup Discovery board demo */
+    demo_button_start(button_cb);
 
     while (true) {
-        str_msg.data = hello;
-        chatter.publish(&str_msg);
-
         ros_node.spinOnce();
-        chThdSleepMilliseconds(100);
+        chThdSleepMilliseconds(10);
         palTogglePad(GPIOD, GPIOD_LED4); // Green
     }
 }

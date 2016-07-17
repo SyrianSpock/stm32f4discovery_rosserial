@@ -116,6 +116,7 @@ CSRC = $(STARTUPSRC) \
        $(PLATFORMSRC) \
        $(BOARDSRC) \
        $(TESTSRC) \
+       src/discovery_demo/button.c \
        src/syscalls.c \
        src/usbcfg.c
 
