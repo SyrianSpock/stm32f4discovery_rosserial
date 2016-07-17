@@ -1,7 +1,9 @@
 #include "ch.h"
 #include "hal.h"
-#include "test.h"
 #include "usbcfg.h"
+
+#include "ros.h"
+#include "std_msgs/String.h"
 
 
 /*
@@ -50,14 +52,23 @@ int main(void)
      */
     chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
 
-    /*
-     * Normal main() thread activity, in this demo it does nothing except
-     * sleeping in a loop and check the button state.
-     */
+    /* ROS setup */
+    ros::NodeHandle ros_node;
+    ros_node.initNode();
+
+    /* ROS publisher */
+    std_msgs::String str_msg;
+    ros::Publisher chatter("chatter", &str_msg);
+    ros_node.advertise(chatter);
+
+    char hello[13] = "hello world!";
+
     while (true) {
-        if (palReadPad(GPIOA, GPIOA_BUTTON)) {
-            TestThread(&SDU1);
-        }
-        chThdSleepMilliseconds(500);
+        str_msg.data = hello;
+        chatter.publish(&str_msg);
+
+        ros_node.spinOnce();
+        chThdSleepMilliseconds(100);
+        palTogglePad(GPIOD, GPIOD_LED4); // Green
     }
 }
