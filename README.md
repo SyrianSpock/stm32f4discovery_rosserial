@@ -23,7 +23,21 @@ rosrun rosserial_python serial_node.py _port:=/dev/ttyACM1
 ```
 Replace `/dev/ttyACM1` by the port used to communicate with your board.
 
-In a new terminal you can see the board sending messages over ROS
+In a new terminal, you can try out the button
 ```bash
-rostopic echo /chatter
+rostopic echo /button
+```
+Everytime you push the button, a message is published
+
+Or you can look at the accelerometer values being published
+```bash
+rostopic echo /accelerometer
+```
+
+Finally, you can control the LEDs intensities by publishing a `std_msgs/UInt16` to one of these topics
+```bash
+rostopic pub /led/red std_msgs/UInt16 --once 1000
+rostopic pub /led/blue std_msgs/UInt16 --once 1000
+rostopic pub /led/green std_msgs/UInt16 --once 1000
+rostopic pub /led/orange std_msgs/UInt16 --once 1000
 ```
