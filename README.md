@@ -1,5 +1,7 @@
 # Rosserial on STM32 Discovery board using ChibiOS
 
+This is a rosserial demo for the STM32F407 discovery board.
+
 ## Quickstart
 
 From the root of this project, generate the ROS message headers
