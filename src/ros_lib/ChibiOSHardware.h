@@ -12,13 +12,13 @@ extern "C" {
 
 class ChibiOSHardware {
     public:
-        ChibiOSHardware(BaseSequentialStream* io)
+        ChibiOSHardware(BaseChannel* io)
         {
             iostream = io;
         }
         ChibiOSHardware()
         {
-            iostream = (BaseSequentialStream *)&SDU1;
+            iostream = (BaseChannel *)&SDU1;
         }
 
         void init()
@@ -27,12 +27,12 @@ class ChibiOSHardware {
 
         int read()
         {
-            return chSequentialStreamGet(iostream);
+            return chnGetTimeout(iostream, TIME_IMMEDIATE);
         };
 
         void write(uint8_t* data, int length)
         {
-            chSequentialStreamWrite(iostream, data, length);
+            chnWrite(iostream, data, length);
         }
 
         unsigned long time()
@@ -41,7 +41,7 @@ class ChibiOSHardware {
         }
 
     protected:
-        BaseSequentialStream* iostream;
+        BaseChannel* iostream;
 };
 
 #ifdef __cplusplus
