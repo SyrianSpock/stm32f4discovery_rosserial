@@ -2,24 +2,28 @@
 #include "hal.h"
 #include "usbcfg.h"
 
+#include "discovery_demo/accelerometer.h"
 #include "discovery_demo/button.h"
 
 #include "ros.h"
 #include "std_msgs/String.h"
+#include "geometry_msgs/Vector3.h"
 
 
 ros::NodeHandle ros_node;
 
 std_msgs::String str_msg;
-ros::Publisher chatter("chatter", &str_msg);
+geometry_msgs::Vector3 acc_msg;
+ros::Publisher button_pub("button", &str_msg);
+ros::Publisher acc_pub("accelerometer", &acc_msg);
 
 /*
  * This is a periodic thread that does absolutely nothing except flashing
  * a LED.
  */
-static THD_WORKING_AREA(waThread1, 128);
-static THD_FUNCTION(Thread1, arg) {
-
+static THD_WORKING_AREA(waBlinkThd, 128);
+static THD_FUNCTION(BlinkThd, arg)
+{
     (void)arg;
     chRegSetThreadName("blinker");
     while (true) {
@@ -34,7 +38,19 @@ void button_cb(void)
 {
     char hello[16] = "Button pressed!";
     str_msg.data = hello;
-    chatter.publish(&str_msg);
+    button_pub.publish(&str_msg);
+}
+
+void accelerometer_cb(void)
+{
+    float acc[3];
+    demo_acc_get_acc(acc);
+
+    acc_msg.x = acc[0];
+    acc_msg.y = acc[1];
+    acc_msg.z = acc[2];
+
+    acc_pub.publish(&acc_msg);
 }
 
 /*
@@ -62,21 +78,22 @@ int main(void)
     usbConnectBus(serusbcfg.usbp);
 
     /* Create blinker thread */
-    chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
-
+    chThdCreateStatic(waBlinkThd, sizeof(waBlinkThd), NORMALPRIO, BlinkThd, NULL);
 
     /* ROS setup */
     ros_node.initNode();
 
-    /* ROS publisher */
-    ros_node.advertise(chatter);
+    /* ROS publishers */
+    ros_node.advertise(button_pub);
+    ros_node.advertise(acc_pub);
 
     /* Setup Discovery board demo */
     demo_button_start(button_cb);
+    demo_acc_start(accelerometer_cb);
 
     while (true) {
         ros_node.spinOnce();
-        chThdSleepMilliseconds(10);
+        chThdSleepMilliseconds(100);
         palTogglePad(GPIOD, GPIOD_LED4); // Green
     }
 }
