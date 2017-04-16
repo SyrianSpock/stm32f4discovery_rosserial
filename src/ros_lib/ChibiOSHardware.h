@@ -37,7 +37,7 @@ class ChibiOSHardware {
 
         unsigned long time()
         {
-            return MS2ST(chVTGetSystemTimeX());;
+            return ST2MS(chVTGetSystemTimeX());;
         }
 
     protected:
